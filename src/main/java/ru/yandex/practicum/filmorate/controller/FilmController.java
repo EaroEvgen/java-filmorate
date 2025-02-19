@@ -3,7 +3,7 @@ package ru.yandex.practicum.filmorate.controller;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.exception.FilmorateValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.util.Collection;
@@ -48,12 +48,12 @@ public class FilmController {
     }
 
     @PutMapping
-    public Film update(@Valid @RequestBody Film newFilm) throws ValidationException {
+    public Film update(@Valid @RequestBody Film newFilm) throws FilmorateValidationException {
         log.info("Обновить фильм");
         // проверяем необходимые условия
         if (!films.containsKey(newFilm.getId())) {
             log.info("Фильм не найден");
-            throw new ValidationException("Фильм с id = " + newFilm.getId() + " не найден");
+            throw new FilmorateValidationException("Фильм с id = " + newFilm.getId() + " не найден");
         }
 
         validateFilm(newFilm);
@@ -66,19 +66,19 @@ public class FilmController {
         long id = film.getId();
         if (film.getReleaseDate().isBefore(MAX_FILM_AGE)) {
             log.info("Этот фильм староват");
-            throw new ValidationException("Этот фильм староват");
+            throw new FilmorateValidationException("Этот фильм староват");
         }
         if (film.getName() == null || film.getName().isBlank()) {
             log.info("Имя фильма не может быть пустым");
-            throw new ValidationException("Имя фильма не может быть пустым");
+            throw new FilmorateValidationException("Имя фильма не может быть пустым");
         }
         if (film.getDescription() == null || film.getDescription().length() >= MAX_LENGTH_DESCRIPTION) {
             log.info("Максимальная длина описания {}", MAX_LENGTH_DESCRIPTION);
-            throw new ValidationException("Максимальная длина описания " + MAX_LENGTH_DESCRIPTION);
+            throw new FilmorateValidationException("Максимальная длина описания " + MAX_LENGTH_DESCRIPTION);
         }
         if (film.getDuration() == null || film.getDuration().toSeconds() <= 0) {
             log.info("Продолжительность фильма должна быть положительным числом");
-            throw new ValidationException("Продолжительность фильма должна быть положительным числом");
+            throw new FilmorateValidationException("Продолжительность фильма должна быть положительным числом");
         }
     }
 }
