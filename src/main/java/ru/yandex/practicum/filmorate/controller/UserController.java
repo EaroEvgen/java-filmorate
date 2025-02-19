@@ -3,7 +3,7 @@ package ru.yandex.practicum.filmorate.controller;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.exception.FilmorateValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.Instant;
@@ -51,7 +51,7 @@ public class UserController {
         // проверяем необходимые условия
         if (!users.containsKey(newUser.getId())) {
             log.info("Пользователь не найден");
-            throw new ValidationException("Пользователь с id = " + newUser.getId() + " не найден");
+            throw new FilmorateValidationException("Пользователь с id = " + newUser.getId() + " не найден");
         }
         validateUser(newUser);
 
@@ -62,7 +62,7 @@ public class UserController {
     private void validateUser(User user) {
         if (user.getEmail() == null || user.getEmail().isBlank() || !user.getEmail().contains("@")) {
             log.info("Электронная почта не может быть пустой и должна содержать символ @");
-            throw new ValidationException("Электронная почта не может быть пустой и должна содержать символ @");
+            throw new FilmorateValidationException("Электронная почта не может быть пустой и должна содержать символ @");
         }
         long id = user.getId();
         String email = user.getEmail();
@@ -73,18 +73,18 @@ public class UserController {
                 .isEmpty();
         if (!isFreeEmail) {
             log.info("Этот email уже используется");
-            throw new ValidationException("Этот email уже используется");
+            throw new FilmorateValidationException("Этот email уже используется");
         }
         if (user.getLogin() == null || user.getLogin().isBlank() || user.getLogin().contains(" ")) {
             log.info("Логин не может быть пустым и содержать пробелы");
-            throw new ValidationException("Логин не может быть пустым и содержать пробелы");
+            throw new FilmorateValidationException("Логин не может быть пустым и содержать пробелы");
         }
         if (user.getName() == null || user.getName().isBlank()) {
             user.setName(user.getLogin());
         }
         if (user.getBirthday() == null || user.getBirthday().isAfter(Instant.now())) {
             log.info("Дата рождения не может быть в будущем");
-            throw new ValidationException("Дата рождения не может быть в будущем");
+            throw new FilmorateValidationException("Дата рождения не может быть в будущем");
         }
     }
 }
