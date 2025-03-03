@@ -4,9 +4,12 @@ import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exception.FilmorateNotFoundException;
+import ru.yandex.practicum.filmorate.exception.FilmorateOtherException;
 import ru.yandex.practicum.filmorate.exception.FilmorateValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.time.Instant;
 import java.util.Collection;
@@ -15,13 +18,15 @@ import java.util.Collection;
 @Service
 public class FilmService {
     private final FilmStorage films;
+    private final UserStorage users;
     private static final Instant MAX_FILM_AGE = Instant.ofEpochMilli(-2335564800000L);
     private static final int MAX_LENGTH_DESCRIPTION = 200;
 
 
     @Autowired
-    public FilmService(FilmStorage films) {
+    public FilmService(FilmStorage films, UserStorage users) {
         this.films = films;
+        this.users = users;
     }
 
     public Collection<Film> findAll() {
@@ -58,14 +63,29 @@ public class FilmService {
     }
 
     public Film addLike(long filmId, long userId) {
+        if (!films.contains(filmId)) {
+            throw new FilmorateNotFoundException("Фильм с id = " + filmId + " не найден");
+        }
+        if (!users.contains(userId)) {
+            throw new FilmorateNotFoundException("Пользователь с id = " + userId + " не найден");
+        }
         return films.addLike(filmId, userId);
     }
 
     public Film deleteLike(long filmId, long userId) {
+        if (!films.contains(filmId)) {
+            throw new FilmorateNotFoundException("Фильм с id = " + filmId + " не найден");
+        }
+        if (!users.contains(userId)) {
+            throw new FilmorateNotFoundException("Пользователь с id = " + userId + " не найден");
+        }
         return films.deleteLike(filmId, userId);
     }
 
     public Collection<Film> getPopularFilms(int count) {
+        if (count <= 0) {
+            throw new FilmorateOtherException("Число записей должно быть больше нуля");
+        }
         return films.getPopularFilms(count);
     }
 }

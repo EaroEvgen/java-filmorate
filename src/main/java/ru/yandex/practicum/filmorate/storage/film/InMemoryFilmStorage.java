@@ -1,12 +1,12 @@
 package ru.yandex.practicum.filmorate.storage.film;
 
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.exception.FilmorateNotFoundException;
 import ru.yandex.practicum.filmorate.exception.FilmorateValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @Component
@@ -27,13 +27,16 @@ public class InMemoryFilmStorage implements FilmStorage {
     @Override
     public Film update(Film newFilm) {
         if (!films.containsKey(newFilm.getId())) {
-            throw new FilmorateValidationException("Фильм с id = " + newFilm.getId() + " не найден");
+            throw new FilmorateNotFoundException("Фильм с id = " + newFilm.getId() + " не найден");
         }
         return films.put(newFilm.getId(), newFilm);
     }
 
     @Override
     public Film addLike(long filmId, long userId) {
+        if (!films.containsKey(filmId)) {
+            throw new FilmorateNotFoundException("Фильм с id = " + filmId + " не найден");
+        }
         films.get(filmId).getLikes().add(userId);
         return films.get(filmId);
     }
@@ -56,6 +59,11 @@ public class InMemoryFilmStorage implements FilmStorage {
                 })
                 .limit(count)
                 .toList();
+    }
+
+    @Override
+    public boolean contains(long filmId) {
+        return films.containsKey(filmId);
     }
 
     private long getNextId() {

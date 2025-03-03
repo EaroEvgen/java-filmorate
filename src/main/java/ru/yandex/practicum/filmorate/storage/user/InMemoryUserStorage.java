@@ -2,6 +2,8 @@ package ru.yandex.practicum.filmorate.storage.user;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.exception.FilmorateNotFoundException;
+import ru.yandex.practicum.filmorate.exception.FilmorateOtherException;
 import ru.yandex.practicum.filmorate.exception.FilmorateValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
@@ -27,7 +29,7 @@ public class InMemoryUserStorage implements UserStorage {
     public User update(User newUser) {
         if (!users.containsKey(newUser.getId())) {
             log.info("Пользователь не найден");
-            throw new FilmorateValidationException("Пользователь с id = " + newUser.getId() + " не найден");
+            throw new FilmorateNotFoundException("Пользователь с id = " + newUser.getId() + " не найден");
         }
         return users.put(newUser.getId(), newUser);
     }
@@ -54,14 +56,8 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public User addUserFriend(long userId, long friendId) {
-        if(!users.containsKey(userId)) {
-            throw new RuntimeException(String.format("Пользователь с ID = %d не найден.", userId));
-        }
-        if(!users.containsKey(friendId)) {
-            throw new RuntimeException(String.format("Пользователь с ID = %d не найден.", friendId));
-        }
         if(users.get(userId).getFriends().contains(friendId)) {
-            throw new RuntimeException(String
+            throw new FilmorateOtherException(String
                     .format("Пользователь с ID = %d уже друг для пользователя с ID = %d.",
                             userId, friendId));
         }
@@ -72,20 +68,19 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public User deleteUserFriend(long userId, long friendId) {
-        if(!users.containsKey(userId)) {
-            throw new RuntimeException(String.format("Пользователь с ID = %d не найден.", userId));
-        }
-        if(!users.containsKey(friendId)) {
-            throw new RuntimeException(String.format("Пользователь с ID = %d не найден.", friendId));
-        }
         if(!users.get(userId).getFriends().contains(friendId)) {
-            throw new RuntimeException(String
+            throw new FilmorateOtherException(String
                     .format("Пользователь с ID = %d уже не друг для пользователя с ID = %d.",
                             userId, friendId));
         }
         users.get(userId).getFriends().remove(friendId);
         users.get(friendId).getFriends().remove(userId);
         return users.get(userId);
+    }
+
+    @Override
+    public boolean contains(long userId) {
+        return users.containsKey(userId);
     }
 
     private long getNextId() {

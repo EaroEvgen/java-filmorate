@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exception.FilmorateNotFoundException;
 import ru.yandex.practicum.filmorate.exception.FilmorateValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
@@ -58,22 +59,46 @@ public class UserService {
     }
 
     public User getUserById(long userId) {
+        if (!users.contains(userId)) {
+            throw new FilmorateNotFoundException("Пользователь с id = " + userId + " не найден");
+        }
         return users.getUserById(userId);
     }
 
     public Collection<User> getUserFriends(long userId) {
+        if (!users.contains(userId)) {
+            throw new FilmorateNotFoundException("Пользователь с id = " + userId + " не найден");
+        }
         return users.getUserFriends(userId);
     }
 
     public User addUserFriend(long userId, long friendId) {
+        if (!users.contains(userId)) {
+            throw new FilmorateNotFoundException("Пользователь с id = " + userId + " не найден");
+        }
+        if (!users.contains(friendId)) {
+            throw new FilmorateNotFoundException("Пользователь с id = " + friendId + " не найден");
+        }
         return users.addUserFriend(userId, friendId);
     }
 
     public User deleteUserFriend(long userId, long friendId) {
+        if (!users.contains(userId)) {
+            throw new FilmorateNotFoundException("Пользователь с id = " + userId + " не найден");
+        }
+        if (!users.contains(friendId)) {
+            throw new FilmorateNotFoundException("Пользователь с id = " + friendId + " не найден");
+        }
         return users.deleteUserFriend(userId, friendId);
     }
 
     public Collection<User> getCommonUserFriends(long userId, long otherId) {
+        if (!users.contains(userId)) {
+            throw new FilmorateNotFoundException("Пользователь с id = " + userId + " не найден");
+        }
+        if (!users.contains(otherId)) {
+            throw new FilmorateNotFoundException("Пользователь с id = " + otherId + " не найден");
+        }
         Collection<User> userFriends = users.getUserFriends(userId);
         Collection<User> otherFriends = users.getUserFriends(otherId);
         return userFriends.stream().filter(otherFriends::contains).toList();
