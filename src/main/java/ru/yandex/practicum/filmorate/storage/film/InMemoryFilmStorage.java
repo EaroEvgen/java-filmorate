@@ -52,11 +52,7 @@ public class InMemoryFilmStorage implements FilmStorage {
     public Collection<Film> getPopularFilms(int count) {
         return films.values().stream()
                 .sorted((film1, film2) -> {
-                    if (film1.getLikes().size() > film2.getLikes().size()) {
-                        return -1;
-                    } else {
-                        return 1;
-                    }
+                    return Integer.compare(film2.getLikes().size(), film1.getLikes().size());
                 })
                 .limit(count)
                 .toList();
