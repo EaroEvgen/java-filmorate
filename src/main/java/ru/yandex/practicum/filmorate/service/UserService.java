@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate.service;
 
-import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -26,7 +25,7 @@ public class UserService {
         return users.findAll();
     }
 
-    public User create(@Valid User user) {
+    public User create(User user) {
         validateUser(user);
         return users.create(user);
     }
@@ -53,7 +52,10 @@ public class UserService {
         }
     }
 
-    public User update(@Valid User newUser) {
+    public User update(User newUser) {
+        if (!users.contains(newUser.getId())) {
+            throw new FilmorateNotFoundException("Пользователь с id = " + newUser.getId() + " не найден");
+        }
         validateUser(newUser);
         return users.update(newUser);
     }

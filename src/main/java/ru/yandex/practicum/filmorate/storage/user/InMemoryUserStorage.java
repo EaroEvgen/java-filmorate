@@ -3,8 +3,6 @@ package ru.yandex.practicum.filmorate.storage.user;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.FilmorateNotFoundException;
-import ru.yandex.practicum.filmorate.exception.FilmorateOtherException;
-import ru.yandex.practicum.filmorate.exception.FilmorateValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.*;
@@ -22,7 +20,8 @@ public class InMemoryUserStorage implements UserStorage {
     @Override
     public User create(User user) {
         user.setId(getNextId());
-        return users.put(user.getId(), user);
+        users.put(user.getId(), user);
+        return user;
     }
 
     @Override
@@ -31,7 +30,8 @@ public class InMemoryUserStorage implements UserStorage {
             log.info("Пользователь не найден");
             throw new FilmorateNotFoundException("Пользователь с id = " + newUser.getId() + " не найден");
         }
-        return users.put(newUser.getId(), newUser);
+        users.put(newUser.getId(), newUser);
+        return newUser;
     }
 
     @Override
@@ -56,11 +56,6 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public User addUserFriend(long userId, long friendId) {
-        if(users.get(userId).getFriends().contains(friendId)) {
-            throw new FilmorateOtherException(String
-                    .format("Пользователь с ID = %d уже друг для пользователя с ID = %d.",
-                            userId, friendId));
-        }
         users.get(userId).getFriends().add(friendId);
         users.get(friendId).getFriends().add(userId);
         return users.get(userId);
@@ -68,11 +63,6 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public User deleteUserFriend(long userId, long friendId) {
-        if(!users.get(userId).getFriends().contains(friendId)) {
-            throw new FilmorateOtherException(String
-                    .format("Пользователь с ID = %d уже не друг для пользователя с ID = %d.",
-                            userId, friendId));
-        }
         users.get(userId).getFriends().remove(friendId);
         users.get(friendId).getFriends().remove(userId);
         return users.get(userId);

@@ -1,7 +1,6 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import jakarta.validation.Valid;
-import jakarta.websocket.server.PathParam;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -50,8 +49,8 @@ public class FilmController {
         return filmService.deleteLike(filmId, userId);
     }
 
-    @GetMapping("/popular?count={count}")
-    public Collection<Film> getPopularFilms(@PathParam("count") int count) {
+    @GetMapping("/popular")
+    public Collection<Film> getPopularFilms(@RequestParam int count) {
         return filmService.getPopularFilms(count);
     }
 }

@@ -7,6 +7,7 @@ import jakarta.validation.constraints.Past;
 import lombok.Data;
 
 import java.time.Instant;
+import java.util.HashSet;
 import java.util.Set;
 
 @Data
@@ -22,5 +23,5 @@ public class User {
     private String name;
     @Past
     private Instant birthday;
-    private Set<Long> friends;
+    private Set<Long> friends = new HashSet<>();
 }
