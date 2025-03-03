@@ -2,89 +2,64 @@ package ru.yandex.practicum.filmorate.controller;
 
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exception.FilmorateValidationException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserService;
 
-import java.time.Instant;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 
 @Slf4j
 @RestController
 @RequestMapping("/users")
 public class UserController {
-    private final Map<Long, User> users = new HashMap<>();
+    private final UserService userService;
+
+    @Autowired
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
 
     @GetMapping
     public Collection<User> findAll() {
         log.info("Показать всех пользователей");
-        return users.values();
+        return userService.findAll();
+    }
+
+    @GetMapping("/{userId}")
+    public User getUserById(@PathVariable long userId) {
+        return userService.getUserById(userId);
     }
 
     @PostMapping
     public User create(@Valid @RequestBody User user) {
-        // проверяем выполнение необходимых условий
         log.info("Создать пользователя");
-        validateUser(user);
-        // формируем дополнительные данные
-        user.setId(getNextId());
-        // сохраняем новую публикацию в памяти приложения
-        users.put(user.getId(), user);
-        return user;
-    }
-
-    // вспомогательный метод для генерации идентификатора нового поста
-    private long getNextId() {
-        long currentMaxId = users.keySet()
-                .stream()
-                .mapToLong(id -> id)
-                .max()
-                .orElse(0);
-        return ++currentMaxId;
+        return userService.create(user);
     }
 
     @PutMapping
     public User update(@Valid @RequestBody User newUser) {
         log.info("Обновить пользователя");
-        // проверяем необходимые условия
-        if (!users.containsKey(newUser.getId())) {
-            log.info("Пользователь не найден");
-            throw new FilmorateValidationException("Пользователь с id = " + newUser.getId() + " не найден");
-        }
-        validateUser(newUser);
-
-        users.put(newUser.getId(), newUser);
-        return newUser;
+        return userService.update(newUser);
     }
 
-    private void validateUser(User user) {
-        if (user.getEmail() == null || user.getEmail().isBlank() || !user.getEmail().contains("@")) {
-            log.info("Электронная почта не может быть пустой и должна содержать символ @");
-            throw new FilmorateValidationException("Электронная почта не может быть пустой и должна содержать символ @");
-        }
-        long id = user.getId();
-        String email = user.getEmail();
-        boolean isFreeEmail = users.values().stream()
-                .filter(element -> email.equals(element.getEmail()))
-                .filter(element -> id != element.getId())
-                .toList()
-                .isEmpty();
-        if (!isFreeEmail) {
-            log.info("Этот email уже используется");
-            throw new FilmorateValidationException("Этот email уже используется");
-        }
-        if (user.getLogin() == null || user.getLogin().isBlank() || user.getLogin().contains(" ")) {
-            log.info("Логин не может быть пустым и содержать пробелы");
-            throw new FilmorateValidationException("Логин не может быть пустым и содержать пробелы");
-        }
-        if (user.getName() == null || user.getName().isBlank()) {
-            user.setName(user.getLogin());
-        }
-        if (user.getBirthday() == null || user.getBirthday().isAfter(Instant.now())) {
-            log.info("Дата рождения не может быть в будущем");
-            throw new FilmorateValidationException("Дата рождения не может быть в будущем");
-        }
+    @GetMapping("/{userId}/friends")
+    public Collection<User> getUserFriends(@PathVariable long userId) {
+        return userService.getUserFriends(userId);
+    }
+
+    @GetMapping("{userId}/friends/common/{otherId}")
+    public Collection<User> getCommonUserFriends(@PathVariable long userId, @PathVariable long otherId) {
+        return userService.getCommonUserFriends(userId, otherId);
+    }
+
+    @PutMapping("/{userId}/friends/{friendId}")
+    public User addUserFriend(@PathVariable long userId, @PathVariable long friendId) {
+        return userService.addUserFriend(userId, friendId);
+    }
+
+    @DeleteMapping("{userId}/friends/{friendId}")
+    public User deleteUserFriend(@PathVariable long userId, @PathVariable long friendId) {
+        return userService.deleteUserFriend(userId, friendId);
     }
 }
