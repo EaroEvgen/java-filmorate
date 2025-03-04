@@ -1,12 +1,10 @@
 package ru.yandex.practicum.filmorate.service;
 
-import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.config.AppConfig;
 import ru.yandex.practicum.filmorate.exception.FilmorateNotFoundException;
-import ru.yandex.practicum.filmorate.exception.FilmorateOtherException;
 import ru.yandex.practicum.filmorate.exception.FilmorateValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
@@ -33,12 +31,12 @@ public class FilmService {
         return films.findAll();
     }
 
-    public Film create(@Valid Film film) {
+    public Film create(Film film) {
         validateFilm(film);
         return films.create(film);
     }
 
-    public Film update(@Valid Film newFilm) {
+    public Film update(Film newFilm) {
         if (!films.contains(newFilm.getId())) {
             throw new FilmorateNotFoundException("Фильм с id = " + newFilm.getId() + " не найден");
         }
@@ -86,9 +84,6 @@ public class FilmService {
     }
 
     public Collection<Film> getPopularFilms(int count) {
-        if (count <= 0) {
-            throw new FilmorateOtherException("Число записей должно быть больше нуля");
-        }
         return films.getPopularFilms(count);
     }
 }

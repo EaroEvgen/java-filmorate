@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate.storage.user;
 
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -11,9 +10,9 @@ import java.util.Collection;
 public interface UserStorage {
     Collection<User> findAll();
 
-    User create(@Valid User user);
+    User create(User user);
 
-    User update(@Valid User newUser);
+    User update(User newUser);
 
     boolean isFreeEmail(@Email @NotBlank @NotNull String email);
 
