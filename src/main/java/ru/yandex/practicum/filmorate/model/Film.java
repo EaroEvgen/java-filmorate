@@ -7,6 +7,8 @@ import lombok.Data;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.HashSet;
+import java.util.Set;
 
 @Data
 public class Film {
@@ -19,4 +21,5 @@ public class Film {
     private String description;
     private Instant releaseDate;
     private Duration duration;
+    private Set<Long> likes = new HashSet<>();
 }
